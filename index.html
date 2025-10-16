@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description"
+        content="Simulador de multa Contratual para calcular valores de rescisão e serviços adicionais.">
+    <meta name="author" content="Alex Lima, Gustavo">
+    <title>Athon Cancela Smart</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <header class="header" role="banner">
+            <div class="header-content">
+                <div class="header-branding">
+                    <img src="images.png" alt="Logo da Empresa" class="company-logo" title="Logo da Empresa" />
+
+                    <h1>Cancela Smart</h1>
+                </div>
+
+                <button class="btn-toggle-dark" id="btnToggleDarkMode" type="button" aria-label="Alternar modo escuro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16c-4.473 0-8.2-3.815-8.2-8.5 0-1.851.66-3.538 1.757-4.907a.747.747 0 0 1 .288-.288z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content" role="main">
+
+            <div class="input-dashboards">
+                <form id="calculator-form" onsubmit="return false;">
+                    <section class="form-card" aria-labelledby="dados-contrato">
+                        <h2 id="dados-contrato">Dados</h2>
+
+                        <div class="form-group" id="group-planoBase">
+                            <label for="planoBase">Valor do Plano</label>
+                            <div class="input-currency-wrapper">
+                                <input id="planoBase" type="text" inputmode="numeric" placeholder="Ex: 149,90"
+                                    autocomplete="off" aria-required="true" aria-describedby="error-planoBase" />
+                            </div>
+                            <p id="error-planoBase" class="error-feedback">Obrigatório. Insira um valor maior que R$
+                                0,00.</p>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group" id="group-mesesFidelidadeRestantes">
+                                <label for="mesesFidelidadeRestantes">Meses Faltantes ( Fidelidade)</label>
+                                <input id="mesesFidelidadeRestantes" type="number" min="0" max="12" step="1"
+                                    placeholder="Ex: 7" aria-required="true"
+                                    aria-describedby="error-mesesFidelidadeRestantes" />
+                                <p id="error-mesesFidelidadeRestantes" class="error-feedback">O número de meses deve ser
+                                    entre 0 e 12.</p>
+                            </div>
+
+                            <div class="form-group" id="group-diasDeUso">
+                                <label for="diasDeUso">Proporcional de dias utilizados</label>
+                                <input id="diasDeUso" type="number" min="0" max="30" step="1" placeholder="Ex: 15"
+                                    aria-required="true" aria-describedby="error-diasDeUso" />
+                                <p id="error-diasDeUso" class="error-feedback">O número de dias deve ser entre 0 e 30.
+                                </p>
+                            </div>
+                        </div>
+
+                    </section>
+                </form>
+
+                <form id="custos-form" onsubmit="return false;">
+                    <section class="form-card" aria-labelledby="custos-adicionais">
+                        <h2 id="custos-adicionais">Custos Adicionais</h2>
+
+                        <div class="form-group">
+                            <label for="custoEquipamento">Custo de Equipamento Não Devolvido (Selecione)</label>
+                            <select id="custoEquipamento" aria-label="Selecione o custo do equipamento não devolvido">
+                                <option value="0">R$ 0,00 - Equipamento Devolvido</option>
+                                <option value="50">R$ 50,00 - Fonte</option>
+                                <option value="100">R$ 100,00 - TP-Link</option>
+                                <option value="200">R$ 200,00 - ONU</option>
+                                <option value="250">R$ 250,00 - ONU + Fonte</option>
+                                <option value="400">R$ 300,00 - ONU + Roteador</option>
+                                <option value="400">R$ 400,00 - ONT</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="sva-label">SVAs </label>
+                            <div class="sva-list">
+                                <div class="sva-item"><span class="sva-name">R$ 14,90 - Telemedicina</span><input
+                                        class="sva-quantity" data-price="14.90" data-sva-name="Telemedicina" type="number"
+                                        min="0" step="1" value="0" aria-label="Quantidade de Telemedicina" /></div>
+                                <div class="sva-item"><span class="sva-name">R$ 14,90 - WATCH TV</span><input
+                                        class="sva-quantity" data-price="14.90" data-sva-name="WATCH TV" type="number"
+                                        min="0" step="1" value="0" aria-label="Quantidade de WATCH TV" /></div>
+                                <div class="sva-item"><span class="sva-name">R$ 19,90 - Watch + Telemedicina</span><input
+                                        class="sva-quantity" data-price="19.90" data-sva-name="Watch + Telemedicina"
+                                        type="number" min="0" step="1" value="0"
+                                        aria-label="Quantidade de Watch + Telemedicina" /></div>
+                                <div class="sva-item"><span class="sva-name">R$ 19,90 - MESH WIFI</span><input
+                                        class="sva-quantity" data-price="19.90" data-sva-name="Rede Mesh" type="number"
+                                        min="0" step="1" value="0" aria-label="Quantidade de Rede Mesh" /></div>
+                                <div class="sva-item"><span class="sva-name">R$ 34,90 - HBO Max</span><input
+                                        class="sva-quantity" data-price="34.90" data-sva-name="HBO Max" type="number"
+                                        min="0" step="1" value="0" aria-label="Quantidade de HBO Max" /></div>
+                            </div>
+                        </div>
+                    </section>
+                </form>
+
+                <div class="utility-actions" role="group" aria-label="Ações auxiliares">
+                    <button class="btn-tertiary" id="btnReset" type="button"
+                        aria-label="Limpar todos os campos e resetar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            viewBox="0 0 16 16">
+                            <path
+                                d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+                            <path
+                                d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+                        </svg>
+                        Limpar Tudo
+                    </button>
+                </div>
+            </div>
+
+            <aside class="result-card" id="resultadoCard" aria-live="polite"
+                aria-label="Resultados da simulação em tempo real">
+                <p class="result-header">Resultado</p>
+
+                <div class="result-row"><span>Dias de Uso a Cobrar (Proporcional)</span><span id="diasACobrar">0
+                        dias</span></div>
+                <div class="result-row"><span>Valor Mensal Total (Plano + SVAs)</span><span id="valorMensalTotal">R$
+                        0,00</span></div>
+                <div class="result-row"><span>Valor do Proporcional </span><span id="proRata">R$ 0,00</span></div>
+                <div class="result-row"><span>Multa Rescisória</span><span id="multaFidelidade">R$ 0,00</span>
+                </div>
+                <div class="result-row"><span>SVAs </span><span id="totalSva">R$ 0,00</span></div>
+                <div class="result-row"><span>Custo Do Equipamento (Não Devolvido)</span><span id="equipamento">R$
+                        0,00</span></div>
+
+                <div class="result-total">
+                    <span>TOTAL : </span>
+                    <div class="copy-wrapper">
+                        <span id="totalMulta">R$ 0,00</span>
+                        <span id="copySuccessMessage" class="copy-success" aria-live="polite">Copiado!</span>
+                    </div>
+                </div>
+            </aside>
+
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/imask"></script>
+    <script src="log.js"></script>
+</body>
+
+</html>
