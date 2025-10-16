@@ -79,8 +79,13 @@
 
                 <form id="custos-form" onsubmit="return false;">
                     <section class="form-card" aria-labelledby="custos-adicionais">
-                        <h2 id="custos-adicionais">Custos Adicionais</h2>
-
+                        <h2 id="custos-adicionais">Custos Adicionais</h2> 
+<div class="form-group" id="group-custoAdicional">
+                            <label for="custoAdicionalInput">Outros</label>
+                            <div class="input-currency-wrapper">
+                                <input id="custoAdicionalInput" type="text" inputmode="numeric" placeholder="Ex: 50,00"
+                                    autocomplete="off" aria-required="false" />
+                            </div>
                         <div class="form-group">
                             <label for="custoEquipamento">Custo de Equipamento Não Devolvido (Selecione)</label>
                             <select id="custoEquipamento" aria-label="Selecione o custo do equipamento não devolvido">
@@ -144,6 +149,8 @@
                 <div class="result-row"><span>Valor do Proporcional </span><span id="proRata">R$ 0,00</span></div>
                 <div class="result-row"><span>Multa Rescisória</span><span id="multaFidelidade">R$ 0,00</span>
                 </div>
+                <div class="result-row"><span>Outros </span><span id="custoAdicionalOut">R$
+                    0,00</span></div>
                 <div class="result-row"><span>SVAs </span><span id="totalSva">R$ 0,00</span></div>
                 <div class="result-row"><span>Custo Do Equipamento (Não Devolvido)</span><span id="equipamento">R$
                         0,00</span></div>
@@ -166,4 +173,3 @@
 
 
 </html>
-
