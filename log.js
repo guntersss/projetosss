@@ -1,5 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Adicionado um check básico para IMask, caso o script não carregue.
+    if (typeof IMask === 'undefined') {
+        console.error("ERRO CRÍTICO: A biblioteca IMask não foi carregada. Verifique se o <script src='https://unpkg.com/imask'></script> está no seu HTML.");
+        return;
+    }
+
     const REGRA_PADRAO = {
         PERCENTUAL_MULTA: 0.30,
     };
@@ -19,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         diasDeUso: document.getElementById('diasDeUso'),
         custoEquipamento: document.getElementById('custoEquipamento'),
         svaInputs: Array.from(document.querySelectorAll('.sva-quantity')),
+        custoAdicionalInput: document.getElementById('custoAdicionalInput'),
         resultadoCard: document.getElementById('resultadoCard'),
         btnReset: document.getElementById('btnReset'),
         btnToggleDarkMode: document.getElementById('btnToggleDarkMode'),
@@ -35,25 +42,34 @@ document.addEventListener('DOMContentLoaded', () => {
             totalSva: document.getElementById('totalSva'),
             equipamento: document.getElementById('equipamento'),
             totalMulta: document.getElementById('totalMulta'),
+            custoAdicionalOut: document.getElementById('custoAdicionalOut'),
         }
     };
 
-
-       const planoBaseMask = IMask(DOM.planoBase, {
+    const maskOptions = {
         mask: Number,
         scale: 2,
         signed: false,
         thousandsSeparator: '.',
         padFractionalZeros: true,
         normalizeZeros: true,
-        radix: ',', 
-        mapToRadix: ['.'], 
-    });
+        radix: ',',
+        mapToRadix: ['.'],
+    };
+
+
+    const planoBaseMask = IMask(DOM.planoBase, maskOptions);
+    const custoAdicionalMask = IMask(DOM.custoAdicionalInput, maskOptions);
 
     const fmt = v => (isFinite(v) ? v : 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
     function lerInputs() {
-        const planoBase = Number(planoBaseMask.typedValue ?? 0);
+
+         const planoBase = Number(planoBaseMask.typedValue ?? 0);
+
+
+        const custoAdicional = Number(custoAdicionalMask.typedValue ?? 0)
+
 
         const mesesFidelidadeRestantes = Math.min(CONFIG.MAX_MESES_FIDELIDADE, Math.max(0, parseInt(DOM.mesesFidelidadeRestantes.value || 0)));
         const diasDeUso = Math.min(CONFIG.MAX_DIAS_DE_USO, Math.max(0, parseInt(DOM.diasDeUso.value || 0)));
@@ -75,9 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
             mesesFidelidadeRestantes,
             diasDeUso,
             custoEquipamento,
+            custoAdicional, // ✅ Valor do custo adicional
             svaValorTotal,
             svaData,
             planoBaseUnmasked: planoBaseMask.unmaskedValue,
+            custoAdicionalUnmasked: custoAdicionalMask.unmaskedValue, // ✅ Valor não mascarado para salvar
         };
 
         salvarInputs(data);
@@ -85,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calcular(dados) {
-        
+
         const valorMensalTotal = dados.planoBase + dados.svaValorTotal;
 
         let proRataPlanoBase = 0;
@@ -103,13 +121,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const equipamento = dados.custoEquipamento;
+        const custoAdicional = dados.custoAdicional; // Obtém o valor do novo campo
 
-        const total = multaFidelidade + proRataPlanoBase + svaTotal + equipamento;
+        // ✅ Soma o custo adicional ao total
+        const total = multaFidelidade + proRataPlanoBase + svaTotal + equipamento + custoAdicional;
 
         return {
             multaFidelidade,
             proRata: proRataPlanoBase,
             equipamento,
+            custoAdicional, // ✅ Retorna o novo campo
             total,
             valorMensalTotal,
             svaValorTotal: svaTotal
@@ -126,11 +147,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         DOM.out.totalSva.textContent = fmt(res.svaValorTotal);
         DOM.out.equipamento.textContent = fmt(res.equipamento);
+        // ✅ Exibe o novo campo
+        DOM.out.custoAdicionalOut.textContent = fmt(res.custoAdicional); 
         DOM.out.totalMulta.textContent = fmt(res.total);
     }
 
     function isFormEmpty(dados) {
-        const totalMonetaryValue = dados.planoBase + dados.svaValorTotal + dados.custoEquipamento;
+        // ✅ Inclui o custoAdicional na checagem de formulário vazio
+        const totalMonetaryValue = dados.planoBase + dados.svaValorTotal + dados.custoEquipamento + dados.custoAdicional;
         const totalTermValue = dados.mesesFidelidadeRestantes + dados.diasDeUso;
         return totalMonetaryValue === 0 && totalTermValue === 0;
     }
@@ -143,7 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (formIsEmpty || !planoBaseIsValid) {
             DOM.resultadoCard.classList.remove('visible');
-            renderResultados({ multaFidelidade: 0, proRata: 0, equipamento: 0, totalSva: 0, total: 0, valorMensalTotal: 0 }, 0);
+            // ✅ Zera o custoAdicionalOut ao esconder o card
+            renderResultados({ multaFidelidade: 0, proRata: 0, equipamento: 0, custoAdicional: 0, totalSva: 0, total: 0, valorMensalTotal: 0 }, 0);
             return;
         }
 
@@ -178,7 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let errorMessage = '';
 
         if (inputEl === DOM.planoBase) {
-            const planoBaseValue = planoBaseMask.typedValue || 0;
+            // Usa unmaskedValue para garantir que o valor seja lido corretamente
+            const planoBaseValue = parseFloat(planoBaseMask.unmaskedValue) / 100 || 0; 
             if (planoBaseValue <= 0) {
                 isValid = false;
                 errorMessage = "O valor do Plano Base é obrigatório e deve ser maior que R$ 0,00.";
@@ -211,6 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dataToSave = {
                 planoBaseUnmasked: dados.planoBaseUnmasked,
+                // ✅ Salva o valor não mascarado do custo adicional
+                custoAdicionalUnmasked: dados.custoAdicionalUnmasked, 
                 mesesFidelidadeRestantes: dados.mesesFidelidadeRestantes,
                 diasDeUso: dados.diasDeUso,
                 custoEquipamento: dados.custoEquipamento,
@@ -231,6 +259,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.planoBaseUnmasked) {
                 planoBaseMask.unmaskedValue = data.planoBaseUnmasked;
+            }
+            // ✅ Carrega o valor não mascarado do custo adicional
+            if (data.custoAdicionalUnmasked) {
+                custoAdicionalMask.unmaskedValue = data.custoAdicionalUnmasked;
             }
 
             DOM.mesesFidelidadeRestantes.value = data.mesesFidelidadeRestantes || 0;
@@ -254,6 +286,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetFormulario() {
         DOM.planoBase.value = '';
         planoBaseMask.updateValue();
+        DOM.custoAdicionalInput.value = '';
+        custoAdicionalMask.updateValue(); // ✅ Reseta a máscara do custo adicional
+
         DOM.mesesFidelidadeRestantes.value = 0;
         DOM.diasDeUso.value = 0;
         DOM.custoEquipamento.value = 0;
@@ -282,7 +317,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const allInputs = [
         DOM.planoBase, DOM.mesesFidelidadeRestantes, DOM.diasDeUso,
-        DOM.custoEquipamento, ...DOM.svaInputs
+        DOM.custoEquipamento, DOM.custoAdicionalInput,
+        ...DOM.svaInputs
     ];
 
     allInputs.forEach(input => {
@@ -299,14 +335,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 debouncedCalc();
             });
             planoBaseMask.on('accept', debouncedCalc);
+        } else if (input === DOM.custoAdicionalInput) { 
+            custoAdicionalMask.on('complete', debouncedCalc);
+            custoAdicionalMask.on('accept', debouncedCalc);
         }
     });
 
     DOM.btnReset.addEventListener('click', resetFormulario);
     DOM.btnToggleDarkMode.addEventListener('click', toggleDarkMode);
 
+    // Inicialização
     initDarkMode();
     carregarInputs();
     calcularEExibir();
-
 });
