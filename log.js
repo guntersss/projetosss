@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const CONFIG = {
         DIAS_DO_MES_BASE: 30,
         MAX_MESES_FIDELIDADE: 12,
-        MAX_DIAS_DE_USO: 30,
+        MAX_DIAS_DE_USO: 365,
         DEBOUNCE_MS: 300,
         DARK_MODE_KEY: 'simulador_dark_mode',
         PERSISTENCE_KEY: 'simulador_inputs'
@@ -308,4 +308,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initDarkMode();
     carregarInputs();
     calcularEExibir();
+
 });
